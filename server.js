@@ -59,11 +59,11 @@ async function checkDockerImagesLastModified() {
       }
     }
   })
-  const formattedMessage = '```' + message + '```';
+
   if (outDated) {
-      reportError(formattedMessage)
+      reportError(`Image or images outdated. Hsl-map-server dockerhub images last modified: ${message}`)
   } else {
-      reportInfo(formattedMessage)
+      reportInfo(`Hsl-map-server dockerhub images last modified: ${message}`)
   }
 }
 
