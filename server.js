@@ -1,4 +1,5 @@
 import express from "express";
+import fetch from "node-fetch";
 import { AZURE_TILES_CONTAINER, AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_KEY, DAILY_TASK_SCHEDULE } from "./constants";
 import { reportInfo, reportError } from "./reporter";
 import { createScheduledImport, startScheduledImport } from "./schedule";
@@ -12,7 +13,7 @@ import {
     StorageURL,
   } from '@azure/storage-blob';
 
-
+const MAX_DELAY = 7;
 
 async function checkBlobLastModified() {
     const account = AZURE_STORAGE_ACCOUNT;
@@ -32,16 +33,43 @@ async function checkBlobLastModified() {
     const currentTime = new Date().getTime();
     const timeDifferenceInDays = (currentTime-lastModified) / (24*3600000);
     const roundedDifference = Number((timeDifferenceInDays).toFixed(1));
-    if (timeDifferenceInDays > 7) {
+    if (timeDifferenceInDays > MAX_DELAY) {
         reportError(`Tileset outdated. Tiles.mbtiles in "/${containerName}" container was last updated ${roundedDifference} days ago.`)
     } else {
         reportInfo(`Tiles.mbtiles in "/${containerName}" container was last updated ${roundedDifference} days ago.`)
     }
-
   }
+
+async function checkDockerImagesLastModified() {
+  const dockerImageData = await fetch('https://hub.docker.com/v2/repositories/hsldevcom/hsl-map-server/tags/?page_size=10000')
+  const dockerImageDataJson = await dockerImageData.json();
+  let outDated = false;
+  let message;
+  dockerImageDataJson.results.forEach(result => {
+    const name = result.name;
+    const lastPushed = new Date(result.tag_last_pushed).getTime();
+    const currentTime = new Date().getTime();
+    const timeDifferenceInDays = (currentTime-lastPushed) / (24*3600000);
+    const roundedDifference = Number((timeDifferenceInDays).toFixed(1));
+    const newMessage = `${message ? message+', ' : ''}${name}: ${roundedDifference} days`;
+    if (name === 'dev' || name === 'prod' || name === 'next-prod' || name === 'next') {
+      message = newMessage;
+      if (roundedDifference > MAX_DELAY) {
+        outDated = true;
+      }
+    }
+  })
+  const formattedMessage = '```' + message + '```';
+  if (outDated) {
+      reportError(formattedMessage)
+  } else {
+      reportInfo(formattedMessage)
+  }
+}
 
 createScheduledImport("checkTilesAge", DAILY_TASK_SCHEDULE, async (onComplete = () => {}) => {
     checkBlobLastModified()
+    checkDockerImagesLastModified();
     onComplete();
     return;
 });
