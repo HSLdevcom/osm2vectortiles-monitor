@@ -1,6 +1,7 @@
+import btoa from 'btoa';
 import express from "express";
 import fetch from "node-fetch";
-import { AZURE_TILES_CONTAINER, AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_KEY, DAILY_TASK_SCHEDULE } from "./constants";
+import { AZURE_TILES_CONTAINER, AZURE_STORAGE_ACCOUNT, AZURE_STORAGE_KEY, DAILY_TASK_SCHEDULE, JORE_IMPORT_USERNAME, JORE_IMPORT_PASSWORD } from "./constants";
 import { reportInfo, reportError } from "./reporter";
 import { createScheduledImport, startScheduledImport } from "./schedule";
 
@@ -67,9 +68,40 @@ async function checkDockerImagesLastModified() {
   }
 }
 
+async function checkJoreImport(endpoint) {
+  const dockerImageData = await fetch(endpoint.url, {method:'GET',
+      headers: {'Authorization': 'Basic ' + btoa(JORE_IMPORT_USERNAME + ":" + JORE_IMPORT_PASSWORD)}
+  })
+  const text = await dockerImageData.text();
+  const utcsplit = text.split('UTC');
+  const split = utcsplit[0].split('The import started at <strong>');
+
+  const importStartDate = new Date(split[1]);
+  const dateNow = new Date();
+  const importStartMilliseconds = importStartDate.getTime();
+  const dateNowMilliseconds = dateNow.getTime();
+  const differenceInDays = (dateNowMilliseconds - importStartMilliseconds) / (24*3600000);
+  if (differenceInDays > MAX_DELAY) {
+     reportError(`Jore-import (${endpoint.dev}) last started ${Number((differenceInDays).toFixed(1))} days ago.`)
+  }
+  if (!differenceInDays) {
+     reportError(`Jore-import (${endpoint.dev}) is not responding.`)
+  }
+}
+
+function checkJoreImports() {
+  const endpoints = [
+    {url: 'https://dev.kartat.hsl.fi/jore-import/', env: 'dev'},
+    {url: 'https://stage.kartat.hsl.fi/jore-import/', env: 'stage'},
+    {url: 'https://prod.kartat.hsl.fi/jore-import/', env: 'prod'}
+  ];
+  endpoints.forEach(endpoint => checkJoreImport(endpoint));
+}
+
 createScheduledImport("checkTilesAge", DAILY_TASK_SCHEDULE, async (onComplete = () => {}) => {
     checkBlobLastModified()
     checkDockerImagesLastModified();
+    checkJoreImports();
     onComplete();
     return;
 });
