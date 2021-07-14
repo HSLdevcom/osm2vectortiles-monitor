@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@azure/storage-blob": "^10.4.0",
+    "btoa": "^1.2.1",
     "cron": "^1.8.2",
     "dotenv": "^8.2.0",
     "esm": "^3.2.25",

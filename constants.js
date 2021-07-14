@@ -37,3 +37,5 @@ export const SLACK_WEBHOOK_URL = secretsEnv.SLACK_WEBHOOK_URL || "";
 export const SLACK_MONITOR_MENTION = secretsEnv.SLACK_MONITOR_MENTION || "";
 export const DAILY_TASK_SCHEDULE = secretsEnv.DAILY_TASK_SCHEDULE || "0 0 5 * * *";
 export const ENVIRONMENT = secretsEnv.ENVIRONMENT || "unknown";
+export const JORE_IMPORT_USERNAME = secretsEnv.JORE_IMPORT_USERNAME || "";
+export const JORE_IMPORT_PASSWORD = secretsEnv.JORE_IMPORT_PASSWORD || "";
