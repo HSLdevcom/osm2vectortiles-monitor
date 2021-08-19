@@ -82,10 +82,10 @@ async function checkJoreImport(endpoint) {
   const dateNowMilliseconds = dateNow.getTime();
   const differenceInDays = (dateNowMilliseconds - importStartMilliseconds) / (24*3600000);
   if (differenceInDays > MAX_DELAY) {
-     reportError(`Jore-import (${endpoint.dev}) last started ${Number((differenceInDays).toFixed(1))} days ago.`)
+     reportError(`Jore-import (${endpoint.env}) last started ${Number((differenceInDays).toFixed(1))} days ago.`)
   }
   if (!differenceInDays) {
-     reportError(`Jore-import (${endpoint.dev}) is not responding.`)
+     reportError(`Jore-import (${endpoint.env}) is not responding.`)
   }
 }
 
