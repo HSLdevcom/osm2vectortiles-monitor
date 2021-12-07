@@ -16,10 +16,9 @@ import {
 
 const MAX_DELAY = 7;
 
-async function checkBlobLastModified() {
+async function checkBlobLastModified(containerName) {
     const account = AZURE_STORAGE_ACCOUNT;
     const accountKey = AZURE_STORAGE_KEY;
-    const containerName = AZURE_TILES_CONTAINER;
 
     const credentials = new SharedKeyCredential(account, accountKey);
     const pipeline = StorageURL.newPipeline(credentials);
@@ -99,7 +98,10 @@ function checkJoreImports() {
 }
 
 createScheduledImport("checkTilesAge", DAILY_TASK_SCHEDULE, async (onComplete = () => {}) => {
-    checkBlobLastModified()
+    // AZURE_TILES_CONTAINER can be a list, so iterate through it.
+    AZURE_TILES_CONTAINER.split(',').forEach(container => {
+      checkBlobLastModified(container);
+    });
     checkDockerImagesLastModified();
     checkJoreImports();
     onComplete();
