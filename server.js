@@ -53,7 +53,7 @@ async function checkDockerImagesLastModified() {
     const timeDifferenceInDays = (currentTime-lastPushed) / (24*3600000);
     const roundedDifference = Number((timeDifferenceInDays).toFixed(1));
     const newMessage = `${message ? message+', ' : ''}${name}: ${roundedDifference} days`;
-    if (name === 'dev' || name === 'prod' || name === 'next-prod' || name === 'next') {
+    if (name === 'dev' || name === 'prod') {
       message = newMessage;
       if (roundedDifference > MAX_DELAY) {
         outDated = true;
