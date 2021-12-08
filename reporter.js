@@ -28,7 +28,7 @@ export async function onMonitorEvent(
   const userIds = SLACK_MONITOR_MENTION.split(",");
 
   const mentionUsers =
-    type === messageTypes.ERROR ? userIds.map((id) => `<@${id}> `) : "";
+    userIds.map((id) => `<@${id}>`).join(", ");
 
   const fullMessage = `${
     mentionUsers ? `${mentionUsers} ` : ""
