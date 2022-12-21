@@ -92,7 +92,7 @@ function checkJoreImports() {
   const endpoints = [
     {url: 'https://dev.kartat.hsl.fi/jore-import/', env: 'dev'},
     // {url: 'https://stage.kartat.hsl.fi/jore-import/', env: 'stage'}, // Stage currently not used
-    {url: 'https://prod.kartat.hsl.fi/jore-import/', env: 'prod'}
+    {url: 'https://kartat.hsl.fi/jore-import/', env: 'prod'}
   ];
   endpoints.forEach(endpoint => checkJoreImport(endpoint));
 }
