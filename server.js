@@ -61,7 +61,10 @@ async function checkDockerImagesLastModified() {
   })
 
   if (outDated) {
-      reportError(`Image or images outdated. Hsl-map-server dockerhub images last modified: ${message}`)
+      reportError(`
+        Image or images outdated. Hsl-map-server dockerhub images last modified: ${message}
+        Check pipeline activation from https://github.com/HSLdevcom/hsl-map-server/actions
+        `)
   } else {
       reportInfo(`Hsl-map-server dockerhub images last modified: ${message}`)
   }
